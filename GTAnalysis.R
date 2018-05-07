@@ -1,4 +1,7 @@
-# To perform the iterative
+# To perform the iterative analysis of a GTE.
+require(ggplot2)
+require(reshape2)
+
 Conditions <- NULL
 
 array=c(228, 238, 248, 258)
@@ -8,33 +11,30 @@ for (i in 1:length(array)){
   Conditions <- rbind(Conditions, x)
   
 } #end of for loop
+Conditions$id=rownames(Conditions)
+condi_long=melt(Conditions, id="id")
 
-ggplot(Conditions, aes(x=1:NROW(Conditions)),xlab("Variable"),ylab("Performance"))+
-  theme(legend.position="right")+
-  geom_line(aes(y=pt0),color="aliceblue")+
-  geom_line(aes(y=Tt0),color="antiquewhite2")+
-  geom_line(aes(y=s0),color="aquamarine")+
-  geom_line(aes(y=pt2),color="azure3")+
-  geom_line(aes(y=Tt2),color="bisque2")+
-  geom_line(aes(y=s2),color="blue")+
-  geom_line(aes(y=pt3),color="blueviolet")+
-  geom_line(aes(y=Tt3),color="brown2")+
-  geom_line(aes(y=s3),color="burlywood4")+
-  geom_line(aes(y=pt4),color="cadetblue3")+
-  geom_line(aes(y=Tt4),color="chartreuse2")+
-  geom_line(aes(y=s4),color="chocolate4")+
-  geom_line(aes(y=pt5),color="coral2")+
-  geom_line(aes(y=Tt5),color="cornflowerblue")+
-  geom_line(aes(y=s5),color="cyan3")+
-  geom_line(aes(y=pt7),color="darkblue")+
-  geom_line(aes(y=Tt7),color="goldenrod1")+
-  geom_line(aes(y=s7),color="darkgreen")+
-  geom_line(aes(y=pt9),color="darkolivegreen4")+
-  geom_line(aes(y=Tt9),color="darkorange1")+
-  geom_line(aes(y=s9),color="darkorchid1")+
-  geom_line(aes(y=FuelAir),color="gold")+
-  geom_line(aes(y=FuelAirAfterburn),color="firebrick")+
-  geom_line(aes(y=NondimensionalSpecificThrust),color="deepskyblue4")+
-  geom_line(aes(y=TSFC),color="darkseagreen2")+
-  geom_line(aes(y=ThermalEfficiency),color="darkviolet")+
-  geom_line(aes(y=PropulsiveEfficiency),color="dodgerblue4")
+Condi_pressure=condi_long[condi_long$variable %in% c("pt0","pt2","pt3","pt4",
+                                                     "pt5","pt7","pt9"),]
+Condi_temp=condi_long[condi_long$variable %in% c("Tt0","Tt2","Tt3","Tt4","Tt5",
+                                                 "Tt7","Tt9"),]
+Condi_entropy=condi_long[condi_long$variable %in% c("s0","s2","s3","s4","s5","s7","s9"),]
+
+Condi_perf=condi_long[condi_long$variable %in% c("FuelAir","FuelAirAfterburn",
+                                                 "NondimensionalSpecificThrust",
+                                                 "ThermalEfficiency",
+                                                 "PropulsiveEfficiency"),]
+Condi_TSFC=condi_long[condi_long$variable=="TSFC",]
+
+ggplot(Conditions_long, aes(x=id,y=value,group=variable,color=variable))+
+         geom_line()+ggtitle("All Values")
+ggplot(Condi_pressure, aes(x=id,y=value,group=variable,color=variable))+
+  geom_line()+ggtitle("Total Pressure")
+ggplot(Condi_temp, aes(x=id,y=value,group=variable,color=variable))+
+  geom_line()+ggtitle("Total Temperature")
+ggplot(Condi_entropy, aes(x=id,y=value,group=variable,color=variable))+
+  geom_line()+ggtitle("Entropy(Relative)")
+ggplot(Condi_perf, aes(x=id,y=value,group=variable,color=variable))+
+  geom_line()+ggtitle("Performance")
+ggplot(Condi_TSFC, aes(x=id,y=value,group=variable,color=variable))+
+  geom_line()+ggtitle("TSFC")
